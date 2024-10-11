@@ -1,7 +1,6 @@
-import 'dart:convert'; // Untuk decode JSON
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart'
-    as http; // Mengimpor http untuk melakukan request
+import 'package:http/http.dart' as http;
 import 'package:url_launcher/url_launcher.dart';
 
 class NewsScreen extends StatefulWidget {
@@ -64,12 +63,18 @@ class _NewsScreenState extends State<NewsScreen> {
     );
   }
 
+  // Function to open the URL in the browser
   void _launchURL(String url) async {
     final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      throw 'Could not launch $url';
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        print('Tidak dapat membuka $url');
+        throw 'Tidak dapat membuka $url';
+      }
+    } catch (e) {
+      print('Error saat membuka URL: $e');
     }
   }
 }

@@ -1,36 +1,36 @@
-import 'dart:convert'; // Untuk decode JSON
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart'
-    as http; // Mengimpor http untuk melakukan request
-import 'package:url_launcher/url_launcher.dart';
+import 'package:http/http.dart' as http;
 
-class NewsScreen extends StatefulWidget {
+class EarthquakeScreen extends StatefulWidget {
   @override
-  _NewsScreenState createState() => _NewsScreenState();
+  _EarthquakeScreenState createState() => _EarthquakeScreenState();
 }
 
-class _NewsScreenState extends State<NewsScreen> {
-  List<dynamic>? newsData;
+class _EarthquakeScreenState extends State<EarthquakeScreen> {
+  Map<String, dynamic>? earthquakeData;
 
   @override
   void initState() {
     super.initState();
-    fetchNews();
+    fetchEarthquakeData();
   }
 
-  Future<void> fetchNews() async {
+  Future<void> fetchEarthquakeData() async {
     try {
-      final response =
-          await http.get(Uri.parse('http://10.0.2.2:5000/api/teknologi'));
-      print('Respons API berita: ${response.body}');
+      // BMKG earthquake API endpoint
+      final response = await http.get(
+          Uri.parse('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json'));
+      print('Respons mentah API: ${response.body}'); // Log API response
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          newsData = data; // Setel data API ke newsData
+          earthquakeData =
+              data['Infogempa']['gempa']; // Parsing earthquake data
         });
       } else {
-        print('Gagal memuat berita');
+        throw Exception('Gagal memuat data gempa');
       }
     } catch (e) {
       print('Error: $e');
@@ -41,35 +41,56 @@ class _NewsScreenState extends State<NewsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Berita Teknologi Terbaru'),
+        title: Text('Gempa Terbaru'),
       ),
-      body: newsData == null
-          ? Center(child: CircularProgressIndicator())
-          : ListView.builder(
-              itemCount: newsData?.length ?? 0,
-              itemBuilder: (context, index) {
-                final news = newsData![index];
-                return Card(
-                  margin: const EdgeInsets.all(8.0),
-                  child: ListTile(
-                    title: Text(news['judul']),
-                    subtitle: Text(news['tanggal']),
-                    onTap: () {
-                      _launchURL(news['link']);
-                    },
+      body: earthquakeData == null
+          ? Center(
+              child:
+                  CircularProgressIndicator()) // Show loader while fetching data
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Tanggal: ${earthquakeData!['Tanggal']}',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
-                );
-              },
+                  SizedBox(height: 8),
+                  Text('Jam: ${earthquakeData!['Jam']}'),
+                  SizedBox(height: 8),
+                  Text('Magnitude: ${earthquakeData!['Magnitude']}'),
+                  SizedBox(height: 8),
+                  Text('Kedalaman: ${earthquakeData!['Kedalaman']}'),
+                  SizedBox(height: 8),
+                  Text('Wilayah: ${earthquakeData!['Wilayah']}'),
+                  SizedBox(height: 8),
+                  Text('Potensi: ${earthquakeData!['Potensi']}'),
+                  SizedBox(height: 8),
+                  Text('Koordinat: ${earthquakeData!['Coordinates']}'),
+                  SizedBox(height: 16),
+                  earthquakeData!['Shakemap'] != null
+                      ? Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Peta Shakemap:',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            SizedBox(height: 8),
+                            Image.network(
+                              'https://data.bmkg.go.id/DataMKG/TEWS/${earthquakeData!['Shakemap']}',
+                              errorBuilder: (context, error, stackTrace) {
+                                return Text('Gambar tidak dapat dimuat');
+                              },
+                            ),
+                          ],
+                        )
+                      : Text('Shakemap tidak tersedia'),
+                ],
+              ),
             ),
     );
-  }
-
-  void _launchURL(String url) async {
-    final Uri uri = Uri.parse(url);
-    if (await canLaunchUrl(uri)) {
-      await launchUrl(uri);
-    } else {
-      throw 'Could not launch $url';
-    }
   }
 }
