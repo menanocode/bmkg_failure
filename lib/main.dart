@@ -1,10 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/weather_screen.dart';
-import 'screens/earthquake_screen.dart';
-import 'screens/news_screen.dart'; // Tambahkan ini
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(); // Inisialisasi Firebase
   runApp(MyApp());
 }
 
@@ -12,15 +14,15 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'InfoKU',
+      title: 'Gempa dan Cuaca',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: HomeScreen(),
+      initialRoute: '/login', // Set halaman login sebagai halaman awal
       routes: {
-        '/weather': (context) => WeatherScreen(),
-        '/earthquake': (context) => EarthquakeScreen(),
-        '/news': (context) => NewsScreen(), // Tambahkan ini
+        '/login': (context) => LoginScreen(),
+        '/register': (context) => RegisterScreen(),
+        '/home': (context) => HomeScreen(),
       },
     );
   }
