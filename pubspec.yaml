@@ -30,13 +30,16 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^2.0.0
-  firebase_auth: ^4.16.0
-  cloud_firestore: ^4.5.0
   webview_flutter: ^4.0.0
   http: ^1.2.2
   url_launcher: ^6.0.20
 
+# Jika Firebase akan digunakan di masa depan, cukup hapus komentar ini
+# firebase_core: ^2.0.0
+# firebase_auth: ^4.16.0
+# cloud_firestore: ^4.5.0
+
+# Menambahkan assets untuk gambar/logo
 
 dev_dependencies:
   flutter_test:
@@ -54,10 +57,9 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
-  # The following line ensures that the Material Icons font is
-  # included with your application, so that you can use the icons in
-  # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/images/logo.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
