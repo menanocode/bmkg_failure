@@ -1,65 +1,144 @@
 import 'package:flutter/material.dart';
-import '../services/auth_service.dart';
-import '../services/firestore_service.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
+class RegisterScreen extends StatefulWidget {
+  @override
+  _RegisterScreenState createState() => _RegisterScreenState();
+}
 
-class RegisterScreen extends StatelessWidget {
-  final TextEditingController emailController = TextEditingController();
-  final TextEditingController passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
-  final FirestoreService _firestoreService = FirestoreService();
+class _RegisterScreenState extends State<RegisterScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _domicileController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
-  void _register(BuildContext context) async {
-    String email = emailController.text;
-    String password = passwordController.text;
+  Future<void> register() async {
+    if (_formKey.currentState!.validate()) {
+      try {
+        final response = await http.post(
+          Uri.parse(
+              'http://10.0.2.2/flutter_api/user_api.php?action=register'), // Sesuaikan URL dan tambahkan 'action=register'
+          body: {
+            'nama':
+                _nameController.text, // Sesuaikan dengan PHP (`name` -> `nama`)
+            'email': _emailController.text,
+            'no_hp': _phoneController
+                .text, // Sesuaikan dengan PHP (`phone` -> `no_hp`)
+            'domisili': _domicileController.text,
+            'password': _passwordController.text,
+          },
+        );
 
-    User? user =
-        await _authService.registerWithEmailAndPassword(email, password);
-    if (user != null) {
-      await _firestoreService.addUser(user.uid, email);
-      Navigator.pushReplacementNamed(context, '/home');
-    } else {
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Registrasi Gagal'),
-          content: Text('Gagal mendaftarkan pengguna baru.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          if (data['success'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Registrasi berhasil!')),
+            );
+            Navigator.pop(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Registrasi gagal: ${data['message']}')),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Terjadi kesalahan pada server')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Registrasi')),
+      appBar: AppBar(
+        title: Text('Register'),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-            TextField(
-              controller: passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () => _register(context),
-              child: Text('Daftar'),
-            ),
-          ],
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Nama Lengkap'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan nama lengkap';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan email';
+                  }
+                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                    return 'Masukkan format email yang valid';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                controller: _phoneController,
+                decoration: InputDecoration(labelText: 'Nomor Telepon'),
+                keyboardType: TextInputType.phone,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan nomor telepon';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                controller: _domicileController,
+                decoration: InputDecoration(labelText: 'Domisili'),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan domisili';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16.0),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Masukkan password';
+                  }
+                  if (value.length < 6) {
+                    return 'Password harus lebih dari 6 karakter';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 20.0),
+              ElevatedButton(
+                onPressed: register,
+                child: Text('Register'),
+              ),
+            ],
+          ),
         ),
       ),
     );

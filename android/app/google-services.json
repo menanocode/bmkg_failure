@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "481435585113",
-    "project_id": "bmkg-failure",
-    "storage_bucket": "bmkg-failure.appspot.com"
+    "project_number": "132479751929",
+    "project_id": "mulyono-info-id",
+    "storage_bucket": "mulyono-info-id.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:481435585113:android:a1e5618139a4b3cd647f48",
+        "mobilesdk_app_id": "1:132479751929:android:74bde6459a243253a3b428",
         "android_client_info": {
-          "package_name": "com.bmkg.failure"
+          "package_name": "com.example.gmp_bmkg"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyC6uVBbECslXIJrGdZtEDdinRSP_A-YKuE"
+          "current_key": "AIzaSyBk50E2XthDs2gCX6MggPF7tH3uxx_D4n4"
         }
       ],
       "services": {

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
-import 'home_screen.dart'; // Import halaman Home
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'home_screen.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -12,31 +15,51 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
 
-  // Username dan password yang benar (hardcoded)
-  final String correctUsername = 'user@example.com';
-  final String correctPassword = 'password123';
-
-  void _login() {
-    // Ambil email dan password dari form
+  Future<void> _login() async {
     String email = _emailController.text;
     String password = _passwordController.text;
 
-    // Validasi email dan password
-    if (email == correctUsername && password == correctPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login sukses!')),
-      );
-      // Arahkan ke halaman Home
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-            builder: (context) =>
-                HomeScreen()), // Panggil HomeScreen setelah login sukses
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Login gagal, periksa email dan password!')),
-      );
+    if (_formKey.currentState!.validate()) {
+      try {
+        final response = await http.get(
+          Uri.parse(
+              'http://10.0.2.2/flutter_api/user_api.php?action=login&email=$email&password=$password'),
+        );
+
+        if (response.statusCode == 200) {
+          final responseData = jsonDecode(response.body);
+          if (responseData['success'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Login sukses!')),
+            );
+            // Arahkan ke HomeScreen dengan parameter yang dibutuhkan
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => HomeScreen(
+                  userEmail: email,
+                  userPassword: password,
+                ),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content: Text('Login gagal: ${responseData['message']}')),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text('Terjadi kesalahan pada server')), // Error pada server
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')), // Error koneksi atau lainnya
+        );
+      }
     }
   }
 
@@ -108,23 +131,31 @@ class _LoginScreenState extends State<LoginScreen> {
 
               // Login Button
               ElevatedButton(
-                onPressed: () {
-                  if (_formKey.currentState!.validate()) {
-                    _login(); // Panggil fungsi login
-                  }
-                },
+                onPressed: _login,
                 child: Text('Login'),
               ),
 
               // Opsi "Forgot Password"
               TextButton(
                 onPressed: () {
-                  // Fungsi forgot password dapat ditambahkan di sini
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Forgot password clicked!')),
                   );
                 },
                 child: Text('Forgot Password?'),
+              ),
+
+              // Opsi "Register"
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => RegisterScreen(),
+                    ),
+                  );
+                },
+                child: Text('Belum punya akun? Daftar di sini'),
               ),
             ],
           ),

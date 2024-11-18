@@ -3,21 +3,33 @@ import 'earthquake_screen.dart';
 import 'weather_screen.dart';
 import 'news_screen.dart';
 import 'about_screen.dart';
-import 'login_screen.dart'; // Untuk logout kembali ke login
+import 'login_screen.dart';
 
 class HomeScreen extends StatefulWidget {
+  final String userEmail;
+  final String userPassword;
+
+  HomeScreen({required this.userEmail, required this.userPassword});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   int _currentIndex = 0; // Menyimpan indeks halaman yang aktif
-  final List<Widget> _pages = [
-    EarthquakeScreen(),
-    WeatherScreen(),
-    NewsScreen(),
-    AboutScreen(),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      EarthquakeScreen(),
+      WeatherScreen(),
+      NewsScreen(),
+      AboutScreen(
+          userEmail: widget.userEmail, userPassword: widget.userPassword),
+    ];
+  }
 
   void _logout() {
     Navigator.pushReplacement(

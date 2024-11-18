@@ -45,22 +45,55 @@ class _WeatherScreenState extends State<WeatherScreen> {
                     final weather = sublist[subIndex];
 
                     // Mengambil datetime dan mengubah formatnya
-                    DateTime dateTime = DateTime.parse(weather['datetime']);
+                    DateTime dateTime =
+                        DateTime.parse(weather['local_datetime']);
                     String formattedDate =
                         "${dateTime.day}-${dateTime.month}-${dateTime.year} ${dateTime.hour}:${dateTime.minute}";
 
                     return Card(
                       margin: const EdgeInsets.all(8.0),
-                      child: ListTile(
-                        title: Text('Suhu: ${weather['t']}°C'),
-                        subtitle: Text('Kondisi: ${weather['weather_desc']}'),
-                        trailing: Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                                'Tanggal: $formattedDate'), // Menampilkan tanggal
+                              'Tanggal: $formattedDate',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            ),
+                            SizedBox(height: 8.0),
+                            weather['image'] != null &&
+                                    weather['image'].isNotEmpty
+                                ? Image.network(
+                                    weather['image'],
+                                    height: 50,
+                                    width: 50,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(Icons.broken_image,
+                                          size: 50, color: Colors.grey);
+                                    },
+                                  )
+                                : Icon(Icons.broken_image,
+                                    size: 50, color: Colors.grey),
+                            SizedBox(height: 8.0),
+                            Text('Suhu: ${weather['t']}°C'),
+                            Text('Kelembapan: ${weather['hu']}%'),
+                            Text('Kondisi Cuaca: ${weather['weather_desc']}'),
+                            Text('Kecepatan Angin: ${weather['ws']} km/jam'),
                             Text(
-                                'Lokasi: Cengkareng, Jakarta Barat'), // Menampilkan lokasi tetap
+                                'Arah Angin: ${weather['wd']} (${weather['wd_deg']}°)'),
+                            Text('Tutupan Awan: ${weather['tcc']}%'),
+                            Text('Jarak Pandang: ${weather['vs_text']}'),
+                            SizedBox(height: 8.0),
+                            Text(
+                              'Lokasi: Cengkareng, Jakarta Barat',
+                              style: TextStyle(
+                                color: Colors.grey[700],
+                              ),
+                            ),
                           ],
                         ),
                       ),
