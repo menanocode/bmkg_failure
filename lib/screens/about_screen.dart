@@ -15,10 +15,10 @@ class AboutScreen extends StatefulWidget {
 class _AboutScreenState extends State<AboutScreen> {
   Map<String, dynamic>? userData;
   bool isEditing = false;
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController namaController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
-  final TextEditingController phoneController = TextEditingController();
-  final TextEditingController domicileController = TextEditingController();
+  final TextEditingController no_hpController = TextEditingController();
+  final TextEditingController domisiliController = TextEditingController();
 
   @override
   void initState() {
@@ -29,7 +29,7 @@ class _AboutScreenState extends State<AboutScreen> {
   Future<void> fetchUserData() async {
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2/flutter_api/get_user.php'),
+        Uri.parse('http://192.168.221.95/flutter_api/get_user.php'),
         body: {
           'email': widget.userEmail,
           'password': widget.userPassword,
@@ -41,10 +41,10 @@ class _AboutScreenState extends State<AboutScreen> {
         if (data['success'] == true) {
           setState(() {
             userData = data;
-            nameController.text = data['name'] ?? 'N/A';
+            namaController.text = data['nama'] ?? 'N/A';
             emailController.text = data['email'] ?? 'N/A';
-            phoneController.text = data['phone'] ?? 'N/A';
-            domicileController.text = data['domicile'] ?? 'N/A';
+            no_hpController.text = data['no_hp'] ?? 'N/A';
+            domisiliController.text = data['domisili'] ?? 'N/A';
           });
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -68,12 +68,15 @@ class _AboutScreenState extends State<AboutScreen> {
   Future<void> updateUserData() async {
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2/flutter_api/update_user.php'),
+        Uri.parse('http://192.168.221.95/flutter_api/update_user.php'),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
         body: {
           'email': widget.userEmail,
-          'name': nameController.text,
-          'phone': phoneController.text,
-          'domicile': domicileController.text,
+          'nama': namaController.text,
+          'no_hp': no_hpController.text,
+          'domisili': domisiliController.text,
         },
       );
 
@@ -83,9 +86,9 @@ class _AboutScreenState extends State<AboutScreen> {
           setState(() {
             userData = {
               ...userData!,
-              'name': nameController.text,
-              'phone': phoneController.text,
-              'domicile': domicileController.text,
+              'nama': namaController.text,
+              'no_hp': no_hpController.text,
+              'domisili': domisiliController.text,
             };
             isEditing = false;
           });
@@ -152,7 +155,7 @@ class _AboutScreenState extends State<AboutScreen> {
                       ? Column(
                           children: [
                             TextField(
-                              controller: nameController,
+                              controller: namaController,
                               decoration:
                                   InputDecoration(labelText: 'Nama Lengkap'),
                             ),
@@ -162,12 +165,12 @@ class _AboutScreenState extends State<AboutScreen> {
                               enabled: false, // Email tidak bisa diubah
                             ),
                             TextField(
-                              controller: phoneController,
+                              controller: no_hpController,
                               decoration:
                                   InputDecoration(labelText: 'Nomor Telepon'),
                             ),
                             TextField(
-                              controller: domicileController,
+                              controller: domisiliController,
                               decoration:
                                   InputDecoration(labelText: 'Domisili'),
                             ),
@@ -181,14 +184,14 @@ class _AboutScreenState extends State<AboutScreen> {
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Nama Lengkap: ${userData!['name'] ?? 'N/A'}',
+                            Text('Nama Lengkap: ${userData!['nama'] ?? 'N/A'}',
                                 style: TextStyle(fontSize: 16)),
                             Text('Email: ${userData!['email'] ?? 'N/A'}',
                                 style: TextStyle(fontSize: 16)),
                             Text(
-                                'Nomor Telepon: ${userData!['phone'] ?? 'N/A'}',
+                                'Nomor Telepon: ${userData!['no_hp'] ?? 'N/A'}',
                                 style: TextStyle(fontSize: 16)),
-                            Text('Domisili: ${userData!['domicile'] ?? 'N/A'}',
+                            Text('Domisili: ${userData!['domisili'] ?? 'N/A'}',
                                 style: TextStyle(fontSize: 16)),
                             SizedBox(height: 16.0),
                             ElevatedButton(

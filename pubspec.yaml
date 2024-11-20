@@ -37,8 +37,8 @@ dependencies:
   # firebase_core: ^2.0.0
   # firebase_auth: ^4.16.0
   # cloud_firestore: ^4.5.0
-  sqflite: ^2.0.0+3
-  path: ^1.8.0
+  # sqflite: ^2.0.0+3
+  # path: ^1.8.0
 
 # Jika Firebase akan digunakan di masa depan, cukup hapus komentar ini
 
