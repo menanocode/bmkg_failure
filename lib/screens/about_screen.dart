@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'login_screen.dart';
 
 class AboutScreen extends StatefulWidget {
   final String userEmail;
@@ -69,9 +70,6 @@ class _AboutScreenState extends State<AboutScreen> {
     try {
       final response = await http.post(
         Uri.parse('http://192.168.221.95/flutter_api/update_user.php'),
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
         body: {
           'email': widget.userEmail,
           'nama': namaController.text,
@@ -112,6 +110,72 @@ class _AboutScreenState extends State<AboutScreen> {
         SnackBar(content: Text('Error: $e')),
       );
     }
+  }
+
+  Future<void> deleteUserAccount() async {
+    try {
+      final response = await http.post(
+        Uri.parse('http://192.168.221.95/flutter_api/delete_user.php'),
+        body: {
+          'email': widget.userEmail,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Akun berhasil dihapus!')),
+          );
+
+          // Arahkan kembali ke LoginScreen
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => LoginScreen()),
+            (route) => false, // Hapus semua rute sebelumnya
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Gagal menghapus akun: ${data['message']}')),
+          );
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal menghapus akun')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
+    }
+  }
+
+  void _showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Konfirmasi Penghapusan Akun'),
+          content: Text('Apakah Anda yakin ingin menghapus akun ini?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                deleteUserAccount();
+              },
+              child: Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -201,6 +265,14 @@ class _AboutScreenState extends State<AboutScreen> {
                                 });
                               },
                               child: Text('Edit Data'),
+                            ),
+                            SizedBox(height: 16.0),
+                            ElevatedButton(
+                              onPressed: _showDeleteConfirmationDialog,
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor:
+                                      const Color.fromARGB(255, 242, 198, 198)),
+                              child: Text('Request Hapus Akun'),
                             ),
                           ],
                         ),

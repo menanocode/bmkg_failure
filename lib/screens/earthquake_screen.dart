@@ -47,48 +47,52 @@ class _EarthquakeScreenState extends State<EarthquakeScreen> {
           ? Center(
               child:
                   CircularProgressIndicator()) // Show loader while fetching data
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Tanggal: ${earthquakeData!['Tanggal']}',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  SizedBox(height: 8),
-                  Text('Jam: ${earthquakeData!['Jam']}'),
-                  SizedBox(height: 8),
-                  Text('Magnitude: ${earthquakeData!['Magnitude']}'),
-                  SizedBox(height: 8),
-                  Text('Kedalaman: ${earthquakeData!['Kedalaman']}'),
-                  SizedBox(height: 8),
-                  Text('Wilayah: ${earthquakeData!['Wilayah']}'),
-                  SizedBox(height: 8),
-                  Text('Potensi: ${earthquakeData!['Potensi']}'),
-                  SizedBox(height: 8),
-                  Text('Koordinat: ${earthquakeData!['Coordinates']}'),
-                  SizedBox(height: 16),
-                  earthquakeData!['Shakemap'] != null
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Peta Shakemap:',
-                              style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                            SizedBox(height: 8),
-                            Image.network(
-                              'https://data.bmkg.go.id/DataMKG/TEWS/${earthquakeData!['Shakemap']}',
-                              errorBuilder: (context, error, stackTrace) {
-                                return Text('Gambar tidak dapat dimuat');
-                              },
-                            ),
-                          ],
-                        )
-                      : Text('Shakemap tidak tersedia'),
-                ],
+          : SingleChildScrollView(
+              // Tambahkan SingleChildScrollView di sini
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tanggal: ${earthquakeData!['Tanggal']}',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text('Jam: ${earthquakeData!['Jam']}'),
+                    SizedBox(height: 8),
+                    Text('Magnitude: ${earthquakeData!['Magnitude']}'),
+                    SizedBox(height: 8),
+                    Text('Kedalaman: ${earthquakeData!['Kedalaman']}'),
+                    SizedBox(height: 8),
+                    Text('Wilayah: ${earthquakeData!['Wilayah']}'),
+                    SizedBox(height: 8),
+                    Text('Potensi: ${earthquakeData!['Potensi']}'),
+                    SizedBox(height: 8),
+                    Text('Koordinat: ${earthquakeData!['Coordinates']}'),
+                    SizedBox(height: 16),
+                    earthquakeData!['Shakemap'] != null
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Peta Shakemap:',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 8),
+                              Image.network(
+                                'https://data.bmkg.go.id/DataMKG/TEWS/${earthquakeData!['Shakemap']}',
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Text('Gambar tidak dapat dimuat');
+                                },
+                              ),
+                            ],
+                          )
+                        : Text('Shakemap tidak tersedia'),
+                  ],
+                ),
               ),
             ),
     );
