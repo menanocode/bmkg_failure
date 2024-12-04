@@ -23,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         final response = await http.get(
           Uri.parse(
-              'http://192.168.221.95/flutter_api/user_api.php?action=login&email=$email&password=$password'),
+              'http://192.168.125.95/flutter_api/user_api.php?action=login&email=$email&password=$password'),
         );
 
         if (response.statusCode == 200) {
