@@ -1,23 +1,17 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:audioplayers/audioplayers.dart';
-import 'package:vibration/vibration.dart';
-import 'package:flutter/scheduler.dart'; // Import the scheduler package
+import 'package:just_audio/just_audio.dart';
 
 class EarthquakeScreen extends StatefulWidget {
   @override
   _EarthquakeScreenState createState() => _EarthquakeScreenState();
 }
 
-class _EarthquakeScreenState extends State<EarthquakeScreen>
-    with TickerProviderStateMixin {
+class _EarthquakeScreenState extends State<EarthquakeScreen> {
   Map<String, dynamic>? earthquakeData;
   late AudioPlayer _audioPlayer;
   bool _isAlarmActive = false;
-  bool _isScreenFlashing = false; // Flag for screen flashing
-  late Ticker _ticker; // Ticker for controlling the flashing
-  int _flashCount = 0; // Count of flashes
 
   @override
   void initState() {
@@ -34,12 +28,16 @@ class _EarthquakeScreenState extends State<EarthquakeScreen>
 
   Future<void> fetchEarthquakeData() async {
     try {
+      // BMKG earthquake API endpoint
       final response = await http.get(
           Uri.parse('https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json'));
+      print('Respons mentah API: ${response.body}'); // Log API response
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         setState(() {
-          earthquakeData = data['Infogempa']['gempa'];
+          earthquakeData =
+              data['Infogempa']['gempa']; // Parsing earthquake data
         });
 
         // Trigger alarm if magnitude > 5.0
@@ -61,51 +59,23 @@ class _EarthquakeScreenState extends State<EarthquakeScreen>
   void _triggerEarthquakeAlarm() async {
     setState(() {
       _isAlarmActive = true;
-      _isScreenFlashing = true; // Start flashing the screen
     });
-
-    // Play alarm sound
-    await _audioPlayer.setSource(AssetSource('assets/earthquake_alarm.mp3'));
-    _audioPlayer.setVolume(1.0);
-    _audioPlayer.setReleaseMode(ReleaseMode.loop);
-    _audioPlayer.play(AssetSource('assets/earthquake_alarm.mp3'));
-
-    // Start vibration
-    if (earthquakeData != null && earthquakeData!['Magnitude'] != null) {
-      double magnitude = double.parse(earthquakeData!['Magnitude']);
-      if (magnitude > 5.0 && !_isAlarmActive) {
-        _triggerEarthquakeAlarm();
-      }
-    }
-
-    // Start flashing the screen
-    _flashCount = 0;
-    _ticker = Ticker(_onTick); // Initialize Ticker
-    _ticker.start();
-  }
-
-  // Control flashing of screen
-  void _onTick(Duration duration) {
-    if (_flashCount < 10) {
-      // Flash for 10 cycles
-      setState(() {
-        _isScreenFlashing = !_isScreenFlashing; // Toggle the flashing
-      });
-      _flashCount++;
-    } else {
-      _ticker.stop();
-      setState(() {
-        _isScreenFlashing = false; // Stop flashing after 10 cycles
-      });
+    // Memuat dan memutar alarm audio
+    try {
+      await _audioPlayer.setAsset('assets/earthquake_alarm.mp3');
+      _audioPlayer.setVolume(1.0);
+      _audioPlayer.setLoopMode(LoopMode.one); // Set untuk looping
+      await _audioPlayer.play(); // Memutar audio tanpa argumen
+    } catch (e) {
+      print('Error saat memutar audio: $e');
     }
   }
 
-  // Stop earthquake alarm
+  // Stop alarm sound
   void _stopEarthquakeAlarm() async {
     await _audioPlayer.stop();
     setState(() {
       _isAlarmActive = false;
-      _isScreenFlashing = false; // Stop flashing
     });
   }
 
@@ -123,6 +93,8 @@ class _EarthquakeScreenState extends State<EarthquakeScreen>
         'Shakemap': 'shakemap_earthquake.png',
       };
     });
+
+    // Trigger alarm for simulation
     _triggerEarthquakeAlarm();
   }
 
@@ -133,81 +105,97 @@ class _EarthquakeScreenState extends State<EarthquakeScreen>
         title: Text('Gempa Terbaru'),
       ),
       body: earthquakeData == null
-          ? Center(child: CircularProgressIndicator())
-          : AnimatedContainer(
-              duration: Duration(milliseconds: 500),
-              color: _isScreenFlashing
-                  ? Colors.red
-                  : Colors.transparent, // Red flash effect
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Tanggal: ${earthquakeData!['Tanggal']}',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                      SizedBox(height: 8),
-                      Text('Jam: ${earthquakeData!['Jam']}'),
-                      SizedBox(height: 8),
-                      Text('Magnitude: ${earthquakeData!['Magnitude']}'),
-                      SizedBox(height: 8),
-                      Text('Kedalaman: ${earthquakeData!['Kedalaman']}'),
-                      SizedBox(height: 8),
-                      Text('Wilayah: ${earthquakeData!['Wilayah']}'),
-                      SizedBox(height: 8),
-                      Text('Potensi: ${earthquakeData!['Potensi']}'),
-                      SizedBox(height: 8),
-                      Text('Koordinat: ${earthquakeData!['Coordinates']}'),
-                      SizedBox(height: 16),
-                      earthquakeData!['Shakemap'] != null
-                          ? Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Peta Shakemap:',
-                                    style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold)),
-                                SizedBox(height: 8),
-                                Image.network(
-                                    'https://data.bmkg.go.id/DataMKG/TEWS/${earthquakeData!['Shakemap']}',
-                                    errorBuilder: (context, error, stackTrace) {
-                                  return Text('Gambar tidak dapat dimuat');
-                                }),
-                              ],
-                            )
-                          : Text('Shakemap tidak tersedia'),
-
-                      // Simulasi gempa
-                      SizedBox(height: 20),
-                      ElevatedButton(
-                        onPressed: _simulateEarthquake,
-                        child: Text('Simulasikan Gempa'),
-                      ),
-
-                      // Peringatan gempa jika magnitudo > 5.0
-                      if (_isAlarmActive)
-                        AlertDialog(
-                          title: Text('Peringatan Gempa!'),
-                          content: Column(
-                            mainAxisSize: MainAxisSize.min,
+          ? Center(
+              child:
+                  CircularProgressIndicator()) // Show loader while fetching data
+          : SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Tanggal: ${earthquakeData!['Tanggal']}',
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(height: 8),
+                    Text('Jam: ${earthquakeData!['Jam']}'),
+                    SizedBox(height: 8),
+                    Text('Magnitude: ${earthquakeData!['Magnitude']}'),
+                    SizedBox(height: 8),
+                    Text('Kedalaman: ${earthquakeData!['Kedalaman']}'),
+                    SizedBox(height: 8),
+                    Text('Wilayah: ${earthquakeData!['Wilayah']}'),
+                    SizedBox(height: 8),
+                    Text('Potensi: ${earthquakeData!['Potensi']}'),
+                    SizedBox(height: 8),
+                    Text('Koordinat: ${earthquakeData!['Coordinates']}'),
+                    SizedBox(height: 16),
+                    earthquakeData!['Shakemap'] != null
+                        ? Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                  'Gempa dengan Magnitudo lebih dari 5.0 Detected!'),
-                              SizedBox(height: 10),
-                              Text('Segera lakukan tindakan evakuasi.'),
+                                'Peta Shakemap:',
+                                style: TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              SizedBox(height: 8),
+                              Image.network(
+                                'https://data.bmkg.go.id/DataMKG/TEWS/${earthquakeData!['Shakemap']}',
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Text('Gambar tidak dapat dimuat');
+                                },
+                              ),
                             ],
-                          ),
-                          actions: [
-                            TextButton(
-                              onPressed: _stopEarthquakeAlarm,
-                              child: Text('OK'),
-                            ),
+                          )
+                        : Text('Shakemap tidak tersedia'),
+
+                    // Simulasi gempa
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      onPressed: _simulateEarthquake,
+                      child: Text('Simulasi Gempa'),
+                    ),
+
+                    // Putar audio alarm gempa
+                    SizedBox(height: 20),
+                    // ElevatedButton(
+                    //   onPressed: () async {
+                    //     print('Memutar audio langsung');
+                    //     try {
+                    //       await _audioPlayer
+                    //           .play(); // Memutar audio tanpa argument
+                    //       print('Audio dimulai');
+                    //     } catch (e) {
+                    //       print('Error saat memutar audio: $e');
+                    //     }
+                    //   },
+                    //   child: Text('Putar Audio Alarm'),
+                    // ),
+
+                    // Peringatan gempa jika magnitudo > 5.0
+                    if (_isAlarmActive)
+                      AlertDialog(
+                        title: Text('Peringatan Gempa!'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                                'Gempa dengan Magnitudo lebih dari 5.0 Detected!'),
+                            SizedBox(height: 10),
+                            Text('Segera lakukan tindakan evakuasi.'),
                           ],
                         ),
-                    ],
-                  ),
+                        actions: [
+                          TextButton(
+                            onPressed: _stopEarthquakeAlarm,
+                            child: Text('OK'),
+                          ),
+                        ],
+                      ),
+                  ],
                 ),
               ),
             ),

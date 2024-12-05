@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'home_screen.dart';
 import 'register_screen.dart';
+import 'resetpassword.dart'; // Import screen reset password
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -15,15 +16,18 @@ class _LoginScreenState extends State<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
 
+  // Fungsi untuk melakukan login
   Future<void> _login() async {
     String email = _emailController.text;
     String password = _passwordController.text;
 
     if (_formKey.currentState!.validate()) {
       try {
+        // Kirim permintaan login ke server
         final response = await http.get(
           Uri.parse(
-              'http://192.168.125.95/flutter_api/user_api.php?action=login&email=$email&password=$password'),
+            'http://10.0.2.2/flutter_api/user_api.php?action=login&email=$email&password=$password',
+          ),
         );
 
         if (response.statusCode == 200) {
@@ -50,14 +54,12 @@ class _LoginScreenState extends State<LoginScreen> {
           }
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text('Terjadi kesalahan pada server')), // Error pada server
+            SnackBar(content: Text('Terjadi kesalahan pada server')),
           );
         }
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')), // Error koneksi atau lainnya
+          SnackBar(content: Text('Error: $e')),
         );
       }
     }
@@ -138,11 +140,15 @@ class _LoginScreenState extends State<LoginScreen> {
               // Opsi "Forgot Password"
               TextButton(
                 onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Forgot password clicked!')),
+                  // Navigasi ke ResetPasswordScreen
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ResetPasswordScreen(),
+                    ),
                   );
                 },
-                child: Text('Forgot Password?'),
+                child: Text('Lupa Password?'),
               ),
 
               // Opsi "Register"
