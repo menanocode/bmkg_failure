@@ -21,7 +21,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         // Kirim permintaan reset password ke server
         final response = await http.get(
           Uri.parse(
-            'http://10.0.2.2/flutter_api/user_api.php?action=reset_password&email=$email',
+            'http://192.168.125.95/flutter_api/user_api.php?action=reset_password&email=$email',
           ),
         );
 

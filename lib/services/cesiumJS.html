@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CesiumJS in WebView</title>
+    <script src="https://unpkg.com/cesium@1.91.0/Build/Cesium/cesium.js"></script>
+    <link
+      href="https://unpkg.com/cesium@1.91.0/Build/Cesium/Widgets/widgets.css"
+      rel="stylesheet"
+    />
+    <style>
+      html,
+      body,
+      #cesiumContainer {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+
+    <script>
+      // Membuat tampilan CesiumJS
+      var viewer = new Cesium.Viewer("cesiumContainer", {
+        terrainProvider: Cesium.createWorldTerrain(), // Memungkinkan tampilan peta 3D
+      });
+    </script>
+  </body>
+</html>

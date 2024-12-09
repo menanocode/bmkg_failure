@@ -26,7 +26,7 @@ class _LoginScreenState extends State<LoginScreen> {
         // Kirim permintaan login ke server
         final response = await http.get(
           Uri.parse(
-            'http://10.0.2.2/flutter_api/user_api.php?action=login&email=$email&password=$password',
+            'http://192.168.125.95/flutter_api/user_api.php?action=login&email=$email&password=$password',
           ),
         );
 

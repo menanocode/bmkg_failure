@@ -40,10 +40,10 @@ class _EarthquakeScreenState extends State<EarthquakeScreen> {
               data['Infogempa']['gempa']; // Parsing earthquake data
         });
 
-        // Trigger alarm if magnitude > 5.0
+        // Trigger alarm if magnitude > 7.0
         if (earthquakeData != null) {
           double magnitude = double.parse(earthquakeData!['Magnitude']);
-          if (magnitude > 5.0 && !_isAlarmActive) {
+          if (magnitude > 7.0 && !_isAlarmActive) {
             _triggerEarthquakeAlarm();
           }
         }
@@ -183,7 +183,7 @@ class _EarthquakeScreenState extends State<EarthquakeScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                                'Gempa dengan Magnitudo lebih dari 5.0 Detected!'),
+                                'Gempa dengan Magnitudo lebih dari 7.0 Detected!'),
                             SizedBox(height: 10),
                             Text('Segera lakukan tindakan evakuasi.'),
                           ],

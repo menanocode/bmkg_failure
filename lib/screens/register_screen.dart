@@ -20,7 +20,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       try {
         final response = await http.post(
           Uri.parse(
-              'http://10.0.2.2/flutter_api/user_api.php?action=register'), // Sesuaikan URL dan tambahkan 'action=register'
+              'http://192.168.125.95/flutter_api/user_api.php?action=register'), // Sesuaikan URL dan tambahkan 'action=register'
           body: {
             'nama':
                 _nameController.text, // Sesuaikan dengan PHP (`name` -> `nama`)

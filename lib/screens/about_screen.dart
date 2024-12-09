@@ -30,7 +30,7 @@ class _AboutScreenState extends State<AboutScreen> {
   Future<void> fetchUserData() async {
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2/flutter_api/get_user.php'),
+        Uri.parse('http://192.168.125.95/flutter_api/get_user.php'),
         body: {
           'email': widget.userEmail,
           'password': widget.userPassword,
@@ -69,7 +69,7 @@ class _AboutScreenState extends State<AboutScreen> {
   Future<void> updateUserData() async {
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2/flutter_api/update_user.php'),
+        Uri.parse('http://192.168.125.95/flutter_api/update_user.php'),
         body: {
           'email': widget.userEmail,
           'nama': namaController.text,
@@ -115,7 +115,7 @@ class _AboutScreenState extends State<AboutScreen> {
   Future<void> deleteUserAccount() async {
     try {
       final response = await http.post(
-        Uri.parse('http://10.0.2.2/flutter_api/delete_user.php'),
+        Uri.parse('http://192.168.125.95/flutter_api/delete_user.php'),
         body: {
           'email': widget.userEmail,
         },
